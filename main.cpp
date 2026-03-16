@@ -4,24 +4,34 @@
    Date: 03/15/2026
  */
 
+
 #include <iostream>
 #include <string>
 #include <cctype>
 #include "Node.h"
 
+
 using namespace std;
+
 
 // Define function protoypes
 void push(Node*& head, char value); // STACK
 char pop(Node*& head); // STACK
-char peek(Node* head); // STACK
-bool isEmpty(Node* head); // STACK
-void enqueue(); // QUEUE
-void dequeue(); // QUEUE
+
+char peek(Node* head); // STACK & QUEUE
+bool isEmpty(Node* head); // STACK & QUEUE
+
+void enqueue(Node*& front, Node*& rear, char value); // QUEUE
+char dequeue(Node*& front, Node*& rear); // QUEUE
+
 
 int main() {
-  // Define stack head node
+  // Define stack head Node
   Node* head = nullptr; // apparently nullptr is better than NULL T^T
+
+  // Define queue front and rear Nodes
+  Node* front = nullptr;
+  Node* head = nullptr;
   
   // Define const var for input comparison
   const string INPUT = "INPUT";
@@ -101,6 +111,7 @@ int main() {
   return 10;
 }
 
+
 // Insert new value at the head of the stack (LIFO)
 void push(Node*& head, char value) {
   Node* newNode = new Node(value); // create new Node
@@ -108,10 +119,12 @@ void push(Node*& head, char value) {
   head = newNode; // set head to new Node
 }
 
+
 // Remove value from head of stack (LIFO)
 char pop(Node*& head) {
   // check if stack is empty
   if (isEmpty(head)) {
+    cout << "Stack UNDERflow, NOT overflow." << endl;
     return '\0';
   }
 
@@ -119,26 +132,65 @@ char pop(Node*& head) {
   Node* tempNode = head; // store value to delete ptr later
   char tempValue = head->getValue();
   head = head->getNext();
+
   delete tempNode; // delete OG ptr
-  
   return tempValue;
 }
 
-// Return element at top of stack
+
+// Return element at top of DS
 char peek(Node* head) {
-  // check if stack is empty
+  // check if DS is empty
   if (isEmpty(head)) {
+    cout << "Either the stack has yet to be stacked || "
+	 << "or you need to add some songs to your queue." << endl;
     return '\0';
   }
 
   return head->getValue();
 }
 
-// Check if stack is empty
+
+// Check if stack OR queue is empty (same for both DS)
 bool isEmpty(Node* head) {
-  if (head == nullptr) {
-    return true;
+  return (head == nullptr);
+}
+
+
+// Insert new value at the rear of the queue (FIFO)
+void enqueue(Node*& front, Node*& rear, char value) {
+  Node* newNode = new Node(value); // create new Node
+
+  // check if queue is empty
+  if (isEmpty(front)) {
+    front = rear = newNode;
+  }
+  // update rear of queue
+  else {
+    rear->setNext(newNode);
+    rear = newNode;
+  }
+}
+
+
+// Remove value from the front of the queue (FIFO)
+char dequeue(Node*& front, Node*& rear) {
+  // check if queue is empty 
+  if (isEmpty(front)) {
+    cout << "Queue underflow, unlike the atmosphere these days" << endl;
+    return '\0';
   }
 
-  return false;
+  // store front Node and update front of queue
+  Node* tempNode = front;
+  char tempValue = front->getValue();
+  front = front->getNext();
+
+  // empty queue case
+  if (front == nullptr) {
+    rear = nullptr;
+  }
+
+  delete tempNode;
+  return tempValue;
 }
