@@ -25,6 +25,11 @@ void enqueue(Node*& front, Node*& rear, char value); // QUEUE
 char dequeue(Node*& front, Node*& rear); // QUEUE
 
 int precedence(char c);
+bool leftAssociativity(char c);
+void postfixOutput(Node* current, string& output);
+
+void binaryExpressionTree(Node*& root, string postfix);
+
 
 int main() {
   // Define stack head Node
@@ -32,7 +37,10 @@ int main() {
 
   // Define queue front and rear Nodes
   Node* front = nullptr;
-  Node* head = nullptr;
+  Node* rear = nullptr;
+
+  // Define binary expression tree starting Node
+  Node* root = nullptr;
   
   // Define const var for input comparison
   const string INPUT = "INPUT";
@@ -71,14 +79,6 @@ int main() {
 	if (isdigit(c)) {
 	  enqueue(front, rear, c); // enqueue numbers
 	  
-	} else if (isOperator(c)) {
-	  // enqueue top of stack if higher precedence than current oper
-	  while ((!isEmpty(head)) &&
-		 (precedence(peek(head)) >= precedence(c))) {
-	    enqueue(front, rear, pop(head));
-	  }
-	  push(head, c); // otherwise push to stack
-	  
 	} else if (c == '(') {
 	  push(head, c); // push LEFT parenthesis to stack
 	  
@@ -87,6 +87,15 @@ int main() {
 	    enqueue(front, rear, pop(head)); // enqueue all oper until matching parentheses
 	  }
 	  pop(head); // bye-bye '('
+	  
+	} else { // handle operators
+	  // enqueue top of stack if higher precedence and left associated
+	  while ((!isEmpty(head)) &&
+		 (precedence(peek(head)) >= precedence(c)) &&
+		 (leftAssociativity(c))) {
+	    enqueue(front, rear, pop(head));
+	  }
+	  push(head, c); // otherwise push to stack
 	}
       }
 
@@ -94,6 +103,11 @@ int main() {
       while (!isEmpty(head)) {
 	enqueue(front, rear, pop(head));
       }
+
+      // Postfix output string
+      string outputString = "";
+      postfixOutput(head, outputString);
+      cout << outputString << endl;
       
     } else if (userCommand == OUTPUT) {
       // prompt user for type of output
@@ -225,3 +239,54 @@ int precedence(char c) {
     return -1;
   }
 }
+
+
+// Determine if a token is left or right associated
+bool leftAssociativity(char c) {
+  if ((c == '+') || (c == '-') || (c == '*') || (c == '/')) {
+    return true;
+  }
+  return false;
+}
+
+
+// Recursively iterate through linked list
+void postfixOutput(Node* current, string& output) {
+  // Base case
+  if (current == nullptr) {
+    return;
+  }
+
+  // Append Node value to output string
+  output += current->getValue();
+
+  // Recursive call
+  postfixOutput(current->getNext(), output);
+}
+
+
+/**
+// Build tree using postfix esspresion
+void binaryExpressionTree(Node*& root, string postfix) {
+  for (char c : postfix) {
+    if (isdigit(c)) { // number
+      push(root, c); // create new node and push onto stack
+    } else { // operator
+      // pop two nodes from track to form subtrees
+      char op2 = peek(root);
+      pop(root);
+      char op1 = peek(root);
+      pop(root);
+
+      // create new Nodes and linked popped Nodes as children
+      Node* opNode = new Node(c);
+      Node* op1Node = new Node(op1);
+      opNode->setLeft(op1Node);
+      Node* op2Node = new Node(op2);
+      opNode->setRight(op2Node);
+
+      push(opNode); // push subtree onto stack
+    }
+  }
+}
+*/

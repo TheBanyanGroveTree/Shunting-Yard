@@ -22,6 +22,6 @@ class Node {
   Node* left;
   Node* right;
   Node* next;
-}
+};
 
 #endif
