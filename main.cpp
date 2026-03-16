@@ -12,13 +12,17 @@
 using namespace std;
 
 // Define function protoypes
-void push(); // STACK
-void pop(); // STACK
-void peek(); // STACK
+void push(Node*& head, char value); // STACK
+char pop(Node*& head); // STACK
+char peek(Node* head); // STACK
+bool isEmpty(Node* head); // STACK
 void enqueue(); // QUEUE
 void dequeue(); // QUEUE
 
 int main() {
+  // Define stack head node
+  Node* head = nullptr; // apparently nullptr is better than NULL T^T
+  
   // Define const var for input comparison
   const string INPUT = "INPUT";
   const string OUTPUT = "OUTPUT";
@@ -95,4 +99,46 @@ int main() {
   }
 
   return 10;
+}
+
+// Insert new value at the head of the stack (LIFO)
+void push(Node*& head, char value) {
+  Node* newNode = new Node(value); // create new Node
+  newNode->setNext(head); // set next ptr of new Node
+  head = newNode; // set head to new Node
+}
+
+// Remove value from head of stack (LIFO)
+char pop(Node*& head) {
+  // check if stack is empty
+  if (isEmpty(head)) {
+    return '\0';
+  }
+
+  // update linked list
+  Node* tempNode = head; // store value to delete ptr later
+  char tempValue = head->getValue();
+  head = head->getNext();
+  delete tempNode; // delete OG ptr
+  
+  return tempValue;
+}
+
+// Return element at top of stack
+char peek(Node* head) {
+  // check if stack is empty
+  if (isEmpty(head)) {
+    return '\0';
+  }
+
+  return head->getValue();
+}
+
+// Check if stack is empty
+bool isEmpty(Node* head) {
+  if (head == nullptr) {
+    return true;
+  }
+
+  return false;
 }

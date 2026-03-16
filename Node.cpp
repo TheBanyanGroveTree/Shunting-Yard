@@ -5,7 +5,7 @@
 using namespace std;
 
 // Constructor
-Node::Node(int value) {
+Node::Node(char value) {
   this->value = value;
   left = nullptr;
   right = nullptr;
@@ -13,7 +13,7 @@ Node::Node(int value) {
 }
 
 // Get value
-int Node::getValue() {
+char Node::getValue() {
   return value;
 }
 
