@@ -24,6 +24,7 @@ bool isEmpty(Node* head); // STACK & QUEUE
 void enqueue(Node*& front, Node*& rear, char value); // QUEUE
 char dequeue(Node*& front, Node*& rear); // QUEUE
 
+int precedence(char c);
 
 int main() {
   // Define stack head Node
@@ -66,16 +67,32 @@ int main() {
       for (int i = 0; i < infix.size(); i++) {
 	char c = infix[i];
 
-	// check char type
+	// Check char type and implement Shunting Yard algo
 	if (isdigit(c)) {
+	  enqueue(front, rear, c); // enqueue numbers
 	  
 	} else if (isOperator(c)) {
-
+	  // enqueue top of stack if higher precedence than current oper
+	  while ((!isEmpty(head)) &&
+		 (precedence(peek(head)) >= precedence(c))) {
+	    enqueue(front, rear, pop(head));
+	  }
+	  push(head, c); // otherwise push to stack
+	  
 	} else if (c == '(') {
-
+	  push(head, c); // push LEFT parenthesis to stack
+	  
 	} else if (c == ')') {
-
+	  while ((!isEmpty(head)) && (peek(head) != '(')) {
+	    enqueue(front, rear, pop(head)); // enqueue all oper until matching parentheses
+	  }
+	  pop(head); // bye-bye '('
 	}
+      }
+
+      // Enqueue remaining operators in stack
+      while (!isEmpty(head)) {
+	enqueue(front, rear, pop(head));
       }
       
     } else if (userCommand == OUTPUT) {
@@ -193,4 +210,18 @@ char dequeue(Node*& front, Node*& rear) {
 
   delete tempNode;
   return tempValue;
+}
+
+
+// Calculate operator with highest precedence using PEMDAS rules
+int precedence(char c) {
+  if ((c == '+') || (c == '-')) {
+    return 1;
+  } else if ((c == '*') || (c == '/')) {
+    return 2;
+  } else if ((c == '^')) {
+    return 3;
+  } else {
+    return -1;
+  }
 }
