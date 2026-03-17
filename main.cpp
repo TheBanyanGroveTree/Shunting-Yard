@@ -15,6 +15,8 @@ using namespace std;
 
 
 // Define function protoypes
+void stringUpper(string& input);
+
 void push(Node*& head, char value); // STACK
 char pop(Node*& head); // STACK
 
@@ -34,6 +36,8 @@ Node* popTree(Node*& root);
 void treeInfixOutput(Node* current);
 void treePrefixOutput(Node* current);
 void treePostfixOutput(Node* current);
+
+void quit(Node* head);
 
 
 int main() {
@@ -64,11 +68,8 @@ int main() {
     cout << "Enter a command (INPUT, OUTPUT, QUIT): ";
     getline(cin, userCommand);
 
-    // convert input to uppercase for comparison
-    for (int i = 0; i < userCommand.size(); i++) {
-      userCommand[i] = toupper(userCommand[i]);
-    }
-    
+    stringUpper(userCommand); // convert input to uppercase for comparison
+
     // Validate input and call appropriate method or exit program
     if (userCommand == INPUT) {
       // read in infix expression
@@ -123,31 +124,43 @@ int main() {
       cout << "Enter output type (INFIX, PREFIX, POSTFIX): ";
       getline(cin, outputType);
 
-      // TO-DO: define function for uppercase conversion
-      // convert input to uppercase for comparison
-      for (int i = 0; i < userCommand.size(); i++) {
-	userCommand[i] = toupper(userCommand[i]);
-      }
+      stringUpper(outputType); // convert input to uppercase for comparison
 
       // Validate input and print appropriate output type
       if (outputType == INFIX) {
-
+	treeInfixOutput(root);
+	cout << endl;
       } else if (outputType == PREFIX) {
-
+	treePrefixOutput(root);
+	cout << endl;
       } else if (outputType == POSTFIX) {
 	treePostfixOutput(root);
+	cout << endl;
       } else {
 	cout << "Please input INFIX, PREFIX, or POSTFIX." << endl;
       }
       
     } else if (userCommand == QUIT) {
-
+      quit(head); // delete stack
+      quit(front); // delete queue
+      quit(root); // delete root
+      
+      newInput = false;
+      
     } else {
       cout << "Please input INPUT, OUTPUT, or QUIT." << endl;
     }
   }
 
   return 10;
+}
+
+
+// Convert string to uppercase
+void stringUpper(string& input) {
+  for (int i = 0; i < input.size(); i++) {
+      input[i] = toupper(input[i]);
+    }
 }
 
 
@@ -260,7 +273,7 @@ bool leftAssociativity(char c) {
 
 // Recursively iterate through linked list
 void algoPostfixOutput(Node* current, string& output) {
-  // Base case: check if empty or reached last Node
+  // base case: check if empty or reached last Node
   if (isEmpty(current)) {
     return;
   }
@@ -277,20 +290,17 @@ void algoPostfixOutput(Node* current, string& output) {
 void binaryExpressionTree(Node*& root, string postfix) {
   for (char c : postfix) {
     if (isdigit(c)) { // number
-      push(root, c); // create new node and push onto stack
+      Node* newNode = new Node(c);
+      pushTree(root, newNode); // create new node and push onto stack
     } else { // operator
-      // pop two nodes from track to form subtrees
-      char op2 = peek(root);
-      pop(root);
-      char op1 = peek(root);
-      pop(root);
+      // pop Nodes to form subtrees
+      Node* right = popTree(root); // right FIRST
+      Node* left = popTree(root);
 
-      // create new Nodes and linked popped Nodes as children
+      // connect tree Nodes
       Node* opNode = new Node(c);
-      Node* op1Node = new Node(op1);
-      opNode->setLeft(op1Node);
-      Node* op2Node = new Node(op2);
-      opNode->setRight(op2Node);
+      opNode->setLeft(left);
+      opNode->setRight(right);
 
       pushTree(root, opNode); // push subtree onto stack
     }
@@ -320,20 +330,53 @@ Node* popTree(Node*& root) {
 }
 
 
-/**
-// Construct infix expr
-void treeInfixOutput(Node* current);
-
-// Construct prefix expr
-void treePrefixOutput(Node* current);
-*/
-
-
-// Perform postorder traversal of tree to construct postfix expr
-void treePostfixOutput(Node* current) {
-  // Base case: check if tree is empty or reached root Node
+// Perform in-order traversal of tree to construct infix expr
+// Left subtree, then root node, and finally right subtree
+void treeInfixOutput(Node* current) {
+  // base case: check if tree is empty or reached root Node
   if (isEmpty(current)) {
-    cout << endl;
+    return;
+  }
+
+  // add left parenthesis
+  if (!isdigit(current->getValue())) {
+    cout << "(";
+  }
+  
+  treeInfixOutput(current->getLeft()); // traverse left subtree
+  
+  cout << current->getValue(); // print value
+  
+  treeInfixOutput(current->getRight()); // traverse right subtree
+
+  // add right parenthesis
+  if (!isdigit(current->getValue())) {
+    cout << ")";
+  }
+}
+
+
+// Perform pre-order traversal of tree to construct prefix expr
+// Root node, then left subtree, and finally right subtree
+void treePrefixOutput(Node* current) {
+  // base case: check if tree is empty or reached root Node
+  if (isEmpty(current)) {
+    return;
+  }
+
+  cout << current->getValue(); // print value
+
+  treePrefixOutput(current->getLeft()); // traverse left subtree
+
+  treePrefixOutput(current->getRight()); // traverse right subtree
+}
+
+
+// Perform post-order traversal of tree to construct postfix expr
+// Left subtree, then right subtree, and finally root
+void treePostfixOutput(Node* current) {
+  // base case: check if tree is empty or reached root Node
+  if (isEmpty(current)) {
     return;
   }
 
@@ -342,4 +385,17 @@ void treePostfixOutput(Node* current) {
   treePostfixOutput(current->getRight()); // traverse right subtree
 
   cout << current->getValue(); // print value
+}
+
+
+// Delete dynamically allocated memory
+void quit(Node* head) {
+  // base case: empty
+  if (isEmpty(head)) {
+    return;
+  }
+
+  // recursive call
+  quit(head->getNext());
+  delete head; // delete current head
 }
