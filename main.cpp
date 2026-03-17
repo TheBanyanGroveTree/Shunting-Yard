@@ -26,9 +26,14 @@ char dequeue(Node*& front, Node*& rear); // QUEUE
 
 int precedence(char c);
 bool leftAssociativity(char c);
-void postfixOutput(Node* current, string& output);
+void algoPostfixOutput(Node* current, string& output);
 
 void binaryExpressionTree(Node*& root, string postfix);
+void pushTree(Node*& root, Node* subtree);
+Node* popTree(Node*& root);
+void treeInfixOutput(Node* current);
+void treePrefixOutput(Node* current);
+void treePostfixOutput(Node* current);
 
 
 int main() {
@@ -88,7 +93,7 @@ int main() {
 	  }
 	  pop(head); // bye-bye '('
 	  
-	} else { // handle operators
+	} else if (!isspace(c)){ // handle operators
 	  // enqueue top of stack if higher precedence and left associated
 	  while ((!isEmpty(head)) &&
 		 (precedence(peek(head)) >= precedence(c)) &&
@@ -106,8 +111,11 @@ int main() {
 
       // Postfix output string
       string outputString = "";
-      postfixOutput(head, outputString);
-      cout << outputString << endl;
+      algoPostfixOutput(front, outputString);
+      cout << "Postfix: " << outputString << endl;
+
+      // Create binary expression tree
+      binaryExpressionTree(root, outputString);
       
     } else if (userCommand == OUTPUT) {
       // prompt user for type of output
@@ -127,7 +135,7 @@ int main() {
       } else if (outputType == PREFIX) {
 
       } else if (outputType == POSTFIX) {
-
+	treePostfixOutput(root);
       } else {
 	cout << "Please input INFIX, PREFIX, or POSTFIX." << endl;
       }
@@ -251,9 +259,9 @@ bool leftAssociativity(char c) {
 
 
 // Recursively iterate through linked list
-void postfixOutput(Node* current, string& output) {
-  // Base case
-  if (current == nullptr) {
+void algoPostfixOutput(Node* current, string& output) {
+  // Base case: check if empty or reached last Node
+  if (isEmpty(current)) {
     return;
   }
 
@@ -261,11 +269,10 @@ void postfixOutput(Node* current, string& output) {
   output += current->getValue();
 
   // Recursive call
-  postfixOutput(current->getNext(), output);
+  algoPostfixOutput(current->getNext(), output);
 }
 
 
-/**
 // Build tree using postfix esspresion
 void binaryExpressionTree(Node*& root, string postfix) {
   for (char c : postfix) {
@@ -285,8 +292,54 @@ void binaryExpressionTree(Node*& root, string postfix) {
       Node* op2Node = new Node(op2);
       opNode->setRight(op2Node);
 
-      push(opNode); // push subtree onto stack
+      pushTree(root, opNode); // push subtree onto stack
     }
   }
 }
+
+
+// Push existing Node to binary expression tree stack
+void pushTree(Node*& root, Node* subtree) {
+  subtree->setNext(root);
+  root = subtree;
+}
+
+
+// Pop Node from stack
+Node* popTree(Node*& root) {
+  // check if stack is empty
+  if (isEmpty(root)) {
+    cout << "Stack UNDERflow, NOT overflow." << endl;
+    return nullptr;
+  }
+
+  Node* tempNode = root;
+  root = root->getNext(); // shift
+  tempNode->setNext(nullptr); // detach from stack
+  return tempNode;
+}
+
+
+/**
+// Construct infix expr
+void treeInfixOutput(Node* current);
+
+// Construct prefix expr
+void treePrefixOutput(Node* current);
 */
+
+
+// Perform postorder traversal of tree to construct postfix expr
+void treePostfixOutput(Node* current) {
+  // Base case: check if tree is empty or reached root Node
+  if (isEmpty(current)) {
+    cout << endl;
+    return;
+  }
+
+  treePostfixOutput(current->getLeft()); // traverse left subtree
+
+  treePostfixOutput(current->getRight()); // traverse right subtree
+
+  cout << current->getValue(); // print value
+}
